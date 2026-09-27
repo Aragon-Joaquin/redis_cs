@@ -1,7 +1,8 @@
 using System.Net;
-using System.Text;
 using System.Net.Sockets;
 using redis_cs;
+using redis_cs.RESP;
+
 
 Console.WriteLine("Logs from your program will appear here!");
 
@@ -23,21 +24,18 @@ static void HandleClient(Socket c)
     int bytes_read = c.Receive(buf);
     if (bytes_read == 0) return;
 
-    string[] text = Encoding.UTF8.GetString(buf, 0, bytes_read).Trim().Split(" ", 2);
 
-    var (action, rest) = text switch
-    {
-      [var a, var r] => (a, r),
-      [var a] => (a, ""),
-      _ => ("", "")
-    };
+    RespReader.ReadBytes(bytes_read, buf);
+
+    string action = "";
+    string rest = "";
 
     Console.Write($"Action used: {action}\n");
 
     switch (action.ToUpper())
     {
       case ACTIONS.PING:
-        c.Send(EncodeBytes.WithCRLF("+PONG"));
+        c.Send(EncodeBytes.WithCRLF("PONG"));
         break;
 
       case ACTIONS.ECHO:
@@ -67,7 +65,7 @@ static void HandleClient(Socket c)
 
           r.HasValue(out string? v);
 
-          c.Send(EncodeBytes.WithCRLF(v ?? ""));
+          c.Send(EncodeBytes.BulkStr(v ?? ""));
           break;
         }
 

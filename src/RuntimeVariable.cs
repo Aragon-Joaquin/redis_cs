@@ -36,10 +36,7 @@ public class RuntimeVariables
   {
     var key = k.Split(" ", 2)[0];
     bool ok = _map_var.TryGetValue(key, out string? val);
-    if (!ok)
-    {
-      return new Error("element doesnt exists");
-    }
+    if (!ok) return new Error("element doesnt exists");
 
     return val ?? "";
   }
