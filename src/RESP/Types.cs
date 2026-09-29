@@ -29,6 +29,3 @@ public static class RespTypes
         { RespPrefixes.Array, "Array" }
   };
 }
-
-
-

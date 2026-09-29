@@ -6,6 +6,9 @@
     <RootNamespace>redis_cs</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <DebugType>portable</DebugType>
   </PropertyGroup>
+
 
 </Project>

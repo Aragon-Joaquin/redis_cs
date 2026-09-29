@@ -25,27 +25,36 @@ static void HandleClient(Socket c)
     if (bytes_read == 0) return;
 
 
-    RespReader.ReadBytes(bytes_read, buf);
+    ReaderResult r;
+    string join_rest;
+    try
+    {
+      r = RespReader.ReadBytes(bytes_read, buf);
+      join_rest = "assad";
+    }
+    catch (Exception e)
+    {
+      Console.WriteLine($"got error: {e}");
+      return;
+    }
 
-    string action = "";
-    string rest = "";
 
-    Console.Write($"Action used: {action}\n");
+    Console.Write($"Action used: {r.command.Content}\n");
 
-    switch (action.ToUpper())
+    switch (r.command.Content.ToUpper())
     {
       case ACTIONS.PING:
         c.Send(EncodeBytes.WithCRLF("PONG"));
         break;
 
       case ACTIONS.ECHO:
-        c.Send(EncodeBytes.BulkStr(rest));
+        c.Send(EncodeBytes.BulkStr(join_rest));
         break;
 
       case ACTIONS.SET:
         {
-          var r = RuntimeVariables.Add(rest);
-          if (r.HasError(out var err))
+          var runvar = RuntimeVariables.Add(join_rest);
+          if (runvar.HasError(out var err))
           {
             c.Send(EncodeBytes.WithCRLF(err.String()));
             break;
@@ -56,14 +65,14 @@ static void HandleClient(Socket c)
 
       case ACTIONS.GET:
         {
-          var r = RuntimeVariables.Get(rest);
-          if (r.HasError(out var err))
+          var runvar = RuntimeVariables.Get(join_rest);
+          if (runvar.HasError(out var err))
           {
             c.Send(EncodeBytes.WithCRLF(err.String()));
             break;
           }
 
-          r.HasValue(out string? v);
+          runvar.HasValue(out string? v);
 
           c.Send(EncodeBytes.BulkStr(v ?? ""));
           break;
