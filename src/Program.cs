@@ -3,7 +3,6 @@ using System.Net.Sockets;
 using redis_cs;
 using redis_cs.RESP;
 
-
 Console.WriteLine("Logs from your program will appear here!");
 
 TcpListener server = new(IPAddress.Any, 6379);
@@ -20,25 +19,14 @@ static void HandleClient(Socket c)
 {
   while (true)
   {
-    byte[] buf = new byte[1024];
-    int bytes_read = c.Receive(buf);
-    if (bytes_read == 0) return;
-
-
-    ReaderResult r;
-    string join_rest;
-    try
+    ReaderResult r = RespReader.ReadBytes(c);
+    if (!r.ok)
     {
-      r = RespReader.ReadBytes(bytes_read, buf);
-      join_rest = "assad";
-    }
-    catch (Exception e)
-    {
-      Console.WriteLine($"got error: {e}");
-      return;
+      c.Send(EncodeBytes.WithCRLF(r.errorMessage));
+      continue;
     }
 
-
+    var join_rest = string.Join(" ", r.rest.Select((s) => s.Content));
     Console.Write($"Action used: {r.command.Content}\n");
 
     switch (r.command.Content.ToUpper())

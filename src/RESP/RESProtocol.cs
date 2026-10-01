@@ -1,3 +1,4 @@
+using System.Net.Sockets;
 using System.Text;
 using redis_cs.src.RESP;
 
@@ -10,18 +11,21 @@ public struct ReaderResult
     this.command = command;
     this.rest = rest;
     ok = true;
+    errorMessage = "";
   }
 
-  public ReaderResult()
+  public ReaderResult(string message)
   {
     command = default!;
     rest = default!;
     ok = false;
+    errorMessage = message;
 
   }
   public BulkString command;
   public List<BulkString> rest;
   public bool ok;
+  public string errorMessage;
 }
 
 public class RespReader
@@ -32,23 +36,34 @@ public class RespReader
   // echo\r\n
   // $11\r\n
   // hello_world\r\n
-  public static ReaderResult ReadBytes(int bytes_read, byte[] buf)
+  public static ReaderResult ReadBytes(Socket c)
   {
+    byte[] buf = new byte[1024];
+    int bytes_read = c.Receive(buf);
+    if (bytes_read == 0) return new("Readed 0 bytes");
+
     string[] lines = Encoding.UTF8.GetString(buf, 0, bytes_read).Split(
           "\r\n",
-          StringSplitOptions.None
+          StringSplitOptions.RemoveEmptyEntries
       );
 
-    ReaderResult res = new();
-    if (lines.Length <= 0) return res;
+    Console.WriteLine("Request ---------------------");
+    foreach (var l in lines)
+    {
+      Console.WriteLine(l);
+
+    }
+    Console.WriteLine("-----------------------------\n");
+
+    if (lines.Length <= 0) return new($"Lines length were {lines.Length}");
 
     //array validation
-    var array = ParseArray(lines);
-    if (array.Type != RespPrefixes.Array || array.Length <= 0) return res;
+    var array = ParseArray(lines.ElementAt(0));
+    if (array.Type != RespPrefixes.Array || array.Length <= 0) return new($"Didnt passed an array as first argument: recieved {array.Type}, {array.Length}");
 
     //getting the command
     var command = VerifyLength(lines[1..3]);
-    if (command == null) return res;
+    if (command == null) return new("Command is null");
 
     //skip the lines already readed
     List<BulkString> rest = [];
@@ -66,10 +81,8 @@ public class RespReader
       }
       start_index += 2;
     }
-    res.command = command;
-    res.rest = rest;
-    res.ok = true;
-    return res;
+
+    return new(command, rest);
   }
 
   public static Data ParseDataType(string text)
@@ -98,17 +111,15 @@ public class RespReader
     return new(body[..val]);
   }
 
-  private static Data ParseArray(string[] lines)
+  private static Data ParseArray(string line)
   {
-    string[] parts = lines.ElementAt(0).Split(RespPrefixes.Array, 2);
-    if (parts.Length != 2) return new();
+    if (line.Length < 2) return new();
 
-    var (array_symbol, array_length) = (parts[0], parts[1]);
+    var (array_symbol, array_length) = (line[..1], line[1..]);
 
-    bool ok = RespTypes.DataTypes.TryGetValue(array_symbol, out var val);
-    if (!ok || val != RespPrefixes.Array) return new();
+    if (array_symbol != RespPrefixes.Array) return new();
 
-    ok = int.TryParse(array_length, out var array_length_int);
+    var ok = int.TryParse(array_length, out var array_length_int);
     if (!ok) return new();
 
     return new(RespPrefixes.Array, "", array_length_int);
