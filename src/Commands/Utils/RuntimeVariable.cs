@@ -1,10 +1,10 @@
-namespace redis_cs;
+namespace redis_cs.Commands.Utils;
 
-public class RuntimeVariables
+internal class RuntimeVariables
 {
   static private readonly Dictionary<string, string> _map_var = [];
 
-  static public Result<bool> Add(string rest)
+  static internal Result<bool> Add(string rest)
   {
     string[] r = rest.Split(" ");
     if (r.Length != 2) return new Error($"Invalid length, have {r.Length} and needed 2");
@@ -23,7 +23,7 @@ public class RuntimeVariables
   // cant i just do:
   // err := RuntimeVars.Add() 
   // ?????
-  static public Result<bool> Add(string k, string v)
+  static internal Result<bool> Add(string k, string v)
   {
     var key = k.Trim();
     if (key == "") return new Error("key is empty");
@@ -32,7 +32,7 @@ public class RuntimeVariables
   }
 
 
-  static public Result<string> Get(string k)
+  static internal Result<string> Get(string k)
   {
     var key = k.Split(" ", 2)[0];
     bool ok = _map_var.TryGetValue(key, out string? val);

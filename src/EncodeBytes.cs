@@ -9,4 +9,5 @@ public class EncodeBytes
   public static byte[] Raw(string str) { return Encoding.UTF8.GetBytes(str); }
   public static byte[] WithCRLF(string str) { return Encoding.UTF8.GetBytes("+" + str + "\r\n"); }
   public static byte[] OK() { return WithCRLF("OK"); }
+  public static byte[] NullBulkStr() { return Raw("$-1\r\n"); }
 }
