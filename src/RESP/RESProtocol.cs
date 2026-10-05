@@ -75,10 +75,8 @@ public class RespReader
       if (start_index + 1 >= lines.Length) break;
 
       var bs = VerifyLength(lines[start_index..(start_index + 2)]);
-      if (bs != null)
-      {
-        rest.Add(bs);
-      }
+      if (bs != null) rest.Add(bs);
+
       start_index += 2;
     }
 

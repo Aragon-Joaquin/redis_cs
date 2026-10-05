@@ -1,3 +1,5 @@
+using redis_cs.src.RESP;
+
 namespace redis_cs.Commands;
 
 public static class COMMADS_NAMES
@@ -28,7 +30,7 @@ public struct CMDResponse
 
 public interface ICommand
 {
-  CMDResponse Do(string line);
+  CMDResponse Do(List<BulkString> lines);
 }
 
 static public class ALL_COMMANDS

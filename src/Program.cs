@@ -27,7 +27,6 @@ static void HandleClient(Socket c)
       continue;
     }
 
-    var join_rest = string.Join(" ", r.rest.Select((s) => s.Content));
     Console.Write($"Action used: {r.command.Content}\n");
 
     var cmd = ALL_COMMANDS.Get(r.command.Content);
@@ -37,7 +36,7 @@ static void HandleClient(Socket c)
       continue;
     }
 
-    var res = cmd.Do(join_rest);
+    var res = cmd.Do(r.rest);
     c.Send(res.Body);
   }
 }
