@@ -12,7 +12,8 @@ public class CMDGet : ICommand
     var runvar = RuntimeVariables.Get(lines.ElementAt(0).Content);
     if (runvar.HasError(out var _)) return new(EncodeBytes.NullBulkStr(), false);
 
-    runvar.HasValue(out string? v);
-    return new(EncodeBytes.BulkStr(v ?? ""));
+    bool ok = runvar.HasValue(out var v);
+    if (!ok) return new(EncodeBytes.NullBulkStr(), false);
+    return new(EncodeBytes.BulkStr(v.Content));
   }
 }
