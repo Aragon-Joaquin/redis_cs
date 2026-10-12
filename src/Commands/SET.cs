@@ -46,7 +46,7 @@ public class CMDSet : ICommand
       }
       i++;
     }
-    return Add_to_dictionary(key, val, expiry) ? new(EncodeBytes.OK()) : new(EncodeBytes.NullBulkStr());
+    return Add_to_dictionary(key, val, expiry) ? new(EncodeBytes.OK()) : new(EncodeBytes.NullBulkStr(), false);
   }
 
   private static bool Add_to_dictionary(string key, string val, DateTime? time)

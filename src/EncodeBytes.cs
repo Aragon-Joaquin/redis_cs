@@ -15,4 +15,7 @@ public class EncodeBytes
 
   public static byte[] OK() => WithCRLF("OK");
   public static byte[] NullBulkStr() => Raw("$-1\r\n");
+
+  public static byte[] Integer(uint val) => Raw($":{val}\r\n");
+
 }

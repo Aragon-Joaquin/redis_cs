@@ -8,6 +8,7 @@ public static class COMMADS_NAMES
   public const string ECHO = "ECHO";
   public const string SET = "SET";
   public const string GET = "GET";
+  public const string RPUSH = "RPUSH";
 }
 
 public struct CMDResponse
@@ -41,6 +42,7 @@ static public class ALL_COMMANDS
     COMMADS_NAMES.ECHO => new CMDEcho(),
     COMMADS_NAMES.SET => new CMDSet(),
     COMMADS_NAMES.GET => new CMDGet(),
+    COMMADS_NAMES.RPUSH => new RPush(),
     _ => null
   };
 }
